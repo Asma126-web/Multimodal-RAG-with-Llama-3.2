@@ -36,7 +36,7 @@ def initialize_llm():
 
 @st.cache_resource
 def initialize_settings():
-    # os.environ["NVIDIA_API_KEY"] = "" #set API key here
+    # os.environ["93a2e316faaf46e386453a2ac90ebf0a"] = "" #set API key here
     Settings.embed_model = NVIDIAEmbedding(model="nvidia/nv-embedqa-e5-v5", truncate="END")
     Settings.llm = initialize_llm()
     Settings.text_splitter = SentenceSplitter(chunk_size=600)
