@@ -1,18 +1,3 @@
-# SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import os
 import fitz
 from pptx import Presentation
@@ -22,6 +7,14 @@ from utils import (
     describe_image, is_graph, process_graph, extract_text_around_item, 
     process_text_blocks, save_uploaded_file
 )
+from openai import OpenAI
+
+# Initialize the Llama 3.2 3B Instruct Turbo model from OpenAI
+def initialize_llm():
+    client = OpenAI(api_key="<YOUR_API_KEY>")
+    model_id = "meta-llama/Llama-3.2-3B-Instruct-Turbo"
+    llm = client.chat.completions.create(model=model_id, messages=[])
+    return llm
 
 def get_pdf_documents(pdf_file, llm):
     """Process a PDF file and extract text, tables, and images."""
@@ -198,87 +191,6 @@ def convert_pdf_to_images(pdf_path):
     os.makedirs(new_dir_path, exist_ok=True)
     image_paths = []
 
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        pix = page.get_pixmap()
-        output_image_path = os.path.join(new_dir_path, f"{pdf_name_without_ext}_{page_num:04d}.png")
-        pix.save(output_image_path)
-        image_paths.append((output_image_path, page_num))
-    doc.close()
-    return image_paths
+    for page_num
 
-def extract_text_and_notes_from_ppt(ppt_path):
-    """Extract text and notes from a PowerPoint file."""
-    prs = Presentation(ppt_path)
-    text_and_notes = []
-    for slide in prs.slides:
-        slide_text = ' '.join([shape.text for shape in slide.shapes if hasattr(shape, "text")])
-        try:
-            notes = slide.notes_slide.notes_text_frame.text if slide.notes_slide else ''
-        except:
-            notes = ''
-        text_and_notes.append((slide_text, notes))
-    return text_and_notes
-
-def load_multimodal_data(files, llm):
-    """Load and process multiple file types."""
-    documents = []
-    for file in files:
-        file_extension = os.path.splitext(file.name.lower())[1]
-        if file_extension in ('.png', '.jpg', '.jpeg'):
-            image_content = file.read()
-            image_text = describe_image(image_content)
-            doc = Document(text=image_text, metadata={"source": file.name, "type": "image"})
-            documents.append(doc)
-        elif file_extension == '.pdf':
-            try:
-                pdf_documents = get_pdf_documents(file, llm)
-                documents.extend(pdf_documents)
-            except Exception as e:
-                print(f"Error processing PDF {file.name}: {e}")
-        elif file_extension in ('.ppt', '.pptx'):
-            try:
-                ppt_documents = process_ppt_file(save_uploaded_file(file))
-                documents.extend(ppt_documents)
-            except Exception as e:
-                print(f"Error processing PPT {file.name}: {e}")
-        else:
-            text = file.read().decode("utf-8")
-            doc = Document(text=text, metadata={"source": file.name, "type": "text"})
-            documents.append(doc)
-    return documents
-
-def load_data_from_directory(directory, llm):
-    """Load and process multiple file types from a directory."""
-    documents = []
-    for filename in os.listdir(directory):
-        filepath = os.path.join(directory, filename)
-        file_extension = os.path.splitext(filename.lower())[1]
-        print(filename)
-        if file_extension in ('.png', '.jpg', '.jpeg'):
-            with open(filepath, "rb") as image_file:
-                image_content = image_file.read()
-            image_text = describe_image(image_content)
-            doc = Document(text=image_text, metadata={"source": filename, "type": "image"})
-            print(doc)
-            documents.append(doc)
-        elif file_extension == '.pdf':
-            with open(filepath, "rb") as pdf_file:
-                try:
-                    pdf_documents = get_pdf_documents(pdf_file, llm)
-                    documents.extend(pdf_documents)
-                except Exception as e:
-                    print(f"Error processing PDF {filename}: {e}")
-        elif file_extension in ('.ppt', '.pptx'):
-            try:
-                ppt_documents = process_ppt_file(filepath)
-                documents.extend(ppt_documents)
-                print(ppt_documents)
-            except Exception as e:
-                print(f"Error processing PPT {filename}: {e}")
-        else:
-            with open(filepath, "r", encoding="utf-8") as text_file:
-                text = text_file.read()
-            doc = Document(text=text, metadata={"source": filename, "type": "text"})
-            documents.append(doc)
-    return documents
+ 
