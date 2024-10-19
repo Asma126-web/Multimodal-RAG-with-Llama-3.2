@@ -11,5 +11,7 @@ llama-index-llms-huggingface==0.2.8
 llama-index-vector-stores-milvus==0.1.20
 pymilvus==2.4.4
 torch==2.4.1+cu124
-transformers
-
+transformers==4.33.2  # Ensures compatibility with llama-index and torch
+libreoffice==7.6.1   # To handle PPT to PDF conversion
+tqdm==4.66.1         # For progress tracking if needed in file processing
+openai==0.28.0       # In case LLM API calls (e.g., OpenAI GPT) are used
